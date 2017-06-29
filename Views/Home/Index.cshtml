@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    <div class="col-md-12">
+    <div id="grid"></div>
+    <br>
+    <button class="k-primary" id="my-button">Click me</button>
+    <br>
+    <div id="chart"></div>
+</div>
+
+@section scripts {
+    <script>
+         $(function(){
+            var myDataSource = new kendo.data.DataSource({
+                serverFiltering:true,
+                serverSorting:true,
+                type:"aspnetmvc-ajax",
+                transport:{
+                    read: {url:"/Home/Sales_Read", method:"get"},
+                    update: {url:"/Home/Sales_Update", method:"put"},
+                    create: {url:"/Home/Sales_Create", method:"post"},
+                    destroy: {url:"/Home/Sales_Destroy", method:"delete"}
+
+                    
+                },
+                schema:{
+                    data:"data",
+                    model:{
+                    id:"id",
+                    fields:{
+                        month: {type:"string"},
+                        videoGames: {type:"number"},
+                        dvds: {type:"number"},
+                        bluRays: {type:"number"}                
+                    }
+                    }
+                }
+            });
+            myDataSource.read();
+
+            $("#my-button").kendoButton({
+            click: function(e) {
+                myDataSource.filter( { field: "dvds", operator: "gt", value:25000  });
+            }
+            });
+
+            $("#grid").kendoGrid({
+                toolbar:["create"],
+                editable:"inline",
+                autoBind:false,
+                sortable:true,
+                columns: [
+                    { field: "month",title: "Month"},
+                    { field: "videoGames",title: "Video Games"},
+                    { field: "dvds",title: "DVDs"},
+                    { field: "bluRays",title: "Blu-Rays"},
+                    { command:["edit", "destroy"], title:"", width:"200px"}       
+                ],
+                dataSource: myDataSource,
+                filterable:true
+            });
+
+            $("#chart").kendoChart({
+                autoBind:false,
+                theme:"material",
+                title:"Monthly Sales",
+                dataSource: myDataSource,
+                seriesDefaults: {type:"line"},
+                series: [
+                    {name:"Video Games", field:"videoGames"},
+                    {name:"DVDs", field:"dvds"},
+                    {name:"Blu-Rays", field:"bluRays"}            
+                ],
+                categoryAxis: {field:"month"}
+                });
+
+      })
+    </script>
+}
